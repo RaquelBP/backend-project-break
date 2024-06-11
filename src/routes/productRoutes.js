@@ -13,6 +13,7 @@ DELETE /dashboard/:productId/delete: Elimina un producto.
 
 
 const { showProducts, showProductById, showProductByCategory, showNewProduct, createProduct, editProduct, updateProduct, deleteProduct } = require('../controllers/productController');
+const { errorMiddleware } = require("../middlewares/errorMiddleware")
 
 const express = require("express");
 const router = express.Router();
@@ -62,14 +63,10 @@ router.put("/dashboard/:id/", updateProduct);
 //router.delete("/dashboard/:id/delete", deleteProduct);
 router.delete("/dashboard/:id/delete", deleteProduct);
 
-/*
-router.use(function (err, req, res, next) {
-    res.status(500).json({
-      error: err.message,
-    });
-  });
 
-*/
+//router.use( errorMiddleware );
+
+
 module.exports = router;
 
 

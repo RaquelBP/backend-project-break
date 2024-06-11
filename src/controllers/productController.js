@@ -47,6 +47,24 @@ function getNavBar(){
     return html;
 }
 
+function errorHandler (req, res) {
+
+    console.error(res.error.message);
+    const statusCode = res.error.status || 500 //Si no hay status code asignado le pone 500
+
+    const errorHtml = `
+    <div class="error">
+        <h1>Error ${statusCode}</h1>
+        <p>${res.error.message}</p>
+    </div>
+    `
+    bodyPlaceholder = getNavBar() + errorHtml
+
+    let html = baseHtml()
+
+    res.status(statusCode).send(html);
+};
+
 //Tarjetas para todos los productos
 function getProductCards(products) {
     let html = '';
@@ -217,17 +235,20 @@ const showProducts = async (req, res) => {
         
         res.send(html);}
     catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to get products" });
+        res.error = error
+        errorHandler(req, res)
     }
 };
 
-const showProductById = async (req, res) => {
+const showProductById = async (req, res, next) => {
     try{
         const product = await Product.findById(req.params.id);
         let html
-        if (!product) {
-            return res.status(404).send({ message: "Product not found" });
+
+        
+        if (!product || !product.image) {
+            res.error = { message: "Error. Product not found", status: 404 };
+            return errorHandler(req, res);
         }
 
         if(req.url.includes("/dashboard")){ //Checkea si estamos en dashboard o no
@@ -242,8 +263,8 @@ const showProductById = async (req, res) => {
         }
         res.send(html);}
     catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to get the product" });
+        res.error = { message: "Invalid product ID" }
+        errorHandler(req, res)
     }
 };
 
@@ -257,7 +278,8 @@ const showProductByCategory = async (req, res) => {
         let html
         const categoriasDisponibles = ["camisetas", "pantalones", "zapatos", "accesorios"];
         if (!categoriasDisponibles.includes(req.params.category)) {
-            return res.status(404).send({ message: "Category not found" });
+            res.error = { message: "Category not found", status: 404 };
+            return errorHandler(req, res);
         } else {
             //console.log("working")
             const productCard = getProductCards(products);
@@ -269,31 +291,28 @@ const showProductByCategory = async (req, res) => {
     }
         
     catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to get the product" });
+        res.error = error
+        errorHandler (req, res)
     }
 };
 
 
 const showNewProduct = async(req, res) => {
     try {
-        bodyPlaceholder = createForm()
+        bodyPlaceholder = getNavBar() + createForm()
         const html = baseHtml()
         res.send(html);
     }
 
     catch (error) {
-        console.error(error);
-        res
-            .status(500)
-            .send({ message: "There was a problem trying to get the form" });
-        }
-}
+        res.error = error
+        errorHandler (req, res)
+}}
 
 
 const createProduct = async(req, res) => {
     try {
-        console.log(req.url) //Cheack si viene de dashboard o no
+        //console.log(req.url) //Cheack si viene de dashboard o no
         //const infoFormulario = ''
         const { name, description, image, category, size, price  } = req.body;
         const product = await Product.create(
@@ -310,41 +329,35 @@ const createProduct = async(req, res) => {
         //res.status(201).send(product);}
 
     catch (error) {
-        console.error(error);
-        res
-            .status(500)
-            .send({ message: "There was a problem trying to create a product" });
+        res.error = error
+        errorHandler (req, res)
 }}
 
 
 const editProduct = async(req, res) => {
     try {
         const product = await Product.findById(req.params.id);
-        bodyPlaceholder = editForm(product)
+        bodyPlaceholder = getNavBar() + editForm(product)
         const html = baseHtml()
         res.send(html);
     }
 
     catch (error) {
-        console.error(error);
-        res
-            .status(500)
-            .send({ message: "There was a problem trying to get the form" });
-        }
-}
+        res.error = error
+        errorHandler (req, res)
+}}
 
 
 
 const updateProduct = async (req, res) => {
     try {
         const { name, description, image, category, size, price  } = req.body;
-        console.log(req.params.id)
-        const product = await Product.findByIdAndUpdate(req.params.id, { name, description, image, category, size, price  }, { new: true });
-        console.log(name)
+        const product = await Product.findByIdAndUpdate(req.params.id, { name, description, image, category, size, price  }, { new: true, runValidators: true } ); //runValidator: True para que detecte los campos requeridos del esquema mongoose
         
         
-        if (!product) {
-            return res.status(404).send({ message: "Product not found" });
+        if (!product || !product.image) {
+            res.error = { message: "Error. Product not found", status: 404 };
+            return errorHandler(req, res);
         }
 
         const productCardDash = getProductCardDash(product);
@@ -354,8 +367,8 @@ const updateProduct = async (req, res) => {
         res.redirect('/dashboard');
         //res.status(200).send(product);
     } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to update the product" });
+        res.error = error
+        errorHandler (req, res)
     }
 }
 
@@ -364,13 +377,14 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
-        if (!product) {
-            return res.status(404).send({ message: "Product not found" });
+        if (!product || !product.image) {
+            res.error = { message: "Error. Product not found", status: 404 };
+            return errorHandler(req, res);
         }
         res.redirect('/dashboard');
     } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to delete the product" });
+        res.error = error
+        errorHandler (req, res)
     }
 }
 
