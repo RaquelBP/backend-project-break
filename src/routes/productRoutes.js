@@ -12,7 +12,7 @@ DELETE /dashboard/:productId/delete: Elimina un producto.
 */
 
 
-const { showProducts, showProductById, showNewProduct, createProduct, editProduct, updateProduct, deleteProduct } = require('../controllers/productController');
+const { showProducts, showProductById, showProductByCategory, showNewProduct, createProduct, editProduct, updateProduct, deleteProduct } = require('../controllers/productController');
 
 const express = require("express");
 const router = express.Router();
@@ -33,10 +33,11 @@ router.get("/", async (req, res) => {
 router.get("/products", showProducts);
 
 
-
 // Obtener una tarea por ID
 router.get("/products/:id", showProductById);
 
+// Filtros
+router.get("/products/filter/:category", showProductByCategory)
 
 //Show dashboard
 router.get("/dashboard", showProducts);
@@ -59,9 +60,16 @@ router.put("/dashboard/:id/", updateProduct);
 
 // Eliminar una tarea por ID
 //router.delete("/dashboard/:id/delete", deleteProduct);
-router.post("/dashboard/:id/delete", deleteProduct);
+router.delete("/dashboard/:id/delete", deleteProduct);
 
+/*
+router.use(function (err, req, res, next) {
+    res.status(500).json({
+      error: err.message,
+    });
+  });
 
+*/
 module.exports = router;
 
 
