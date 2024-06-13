@@ -1,23 +1,11 @@
-/*
-GET /products: Devuelve todos los productos. Cada producto tendrá un enlace a su página de detalle.
-GET /products/:productId: Devuelve el detalle de un producto.
-
-GET /dashboard: Devuelve el dashboard del administrador. En el dashboard aparecerán todos los artículos que se hayan subido. Si clickamos en uno de ellos nos llevará a su página para poder actualizarlo o eliminarlo.
-GET /dashboard/new: Devuelve el formulario para subir un artículo nuevo.
-POST /dashboard: Crea un nuevo producto.
-GET /dashboard/:productId: Devuelve el detalle de un producto en el dashboard.
-GET /dashboard/:productId/edit: Devuelve el formulario para editar un producto.
-PUT /dashboard/:productId: Actualiza un producto.
-DELETE /dashboard/:productId/delete: Elimina un producto.
-*/
-
-
-const { showProducts, showProductById, showProductByCategory, showNewProduct, createProduct, editProduct, updateProduct, deleteProduct } = require('../controllers/productController');
-const { errorMiddleware } = require("../middlewares/errorMiddleware")
-
 const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product"); 
+
+const { showProducts, showProductById, showProductByCategory, showNewProduct, createProduct, editProduct, updateProduct, deleteProduct } = require('../controllers/productController');
+const { monitorAuthState } = require('../middlewares/authMiddleware');
+const { showLoginForm, loginEmailPassword, createAccount, logout } = require('../controllers/authController');
+
 
 //----------ROOT
 router.get("/", async (req, res) => {
@@ -41,128 +29,38 @@ router.get("/products/:id", showProductById);
 router.get("/products/filter/:category", showProductByCategory)
 
 //Show dashboard
-router.get("/dashboard", showProducts);
+router.get("/dashboard", monitorAuthState, showProducts);
 
 //Nuevo Producto Formulario
-router.get("/dashboard/new", showNewProduct)
+router.get("/dashboard/new", monitorAuthState, showNewProduct)
 
 //Detalles de producto por ID
-router.get("/dashboard/:id", showProductById);
+router.get("/dashboard/:id", monitorAuthState, showProductById);
 
 //CREAR producto
-router.post("/dashboard", createProduct);
+router.post("/dashboard", monitorAuthState, createProduct);
 
 // Formulario editar producto
-router.get("/dashboard/:id/edit", editProduct);
+router.get("/dashboard/:id/edit", monitorAuthState, editProduct);
 
 // Actualizar el producto por ID
-router.put("/dashboard/:id/", updateProduct);
+router.put("/dashboard/:id/", monitorAuthState, updateProduct);
 
 
 // Eliminar una tarea por ID
 //router.delete("/dashboard/:id/delete", deleteProduct);
-router.delete("/dashboard/:id/delete", deleteProduct);
+router.delete("/dashboard/:id/delete", monitorAuthState, deleteProduct);
 
 
-//router.use( errorMiddleware );
+
+// Ruta para mostrar el formulario de inicio de sesión
+router.get("/login", showLoginForm);
+
+// Rutas para manejar el login y la creación de cuentas
+router.post("/login", loginEmailPassword);
+router.post("/signup", createAccount);
+
+router.post("/logout", logout);
 
 
 module.exports = router;
-
-
-/*
-router.get("/products/:id", async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).send({ message: "Product not found" });
-        }
-        res.status(200).send(product);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to get the product" });
-    }
-});
-*/
-
-
-
-
-/*
-CREAR TAREA
-async(req, res) => {
-    try {
-        const product = await Product.create(req.body);
-        res.status(201).send(product);
-    } catch (error) {
-        console.error(error);
-        res
-            .status(500)
-            .send({ message: "There was a problem trying to create a product" });
-}}
-
-*/
-
-
-
-/*
-// MARK AS COMPETE
-router.put("/markAsCompleted/:id", async (req, res) => {
-    try {
-        const { completed } = req.body;
-        if (typeof completed === 'undefined') {
-            return res.status(400).send({ message: "Completed field is required" });
-        }
-
-        const product = await Product.findByIdAndUpdate(req.params.id, { completed }, { new: true });
-        if (!product) {
-            return res.status(404).send({ message: "Product not found" });
-        }
-        res.status(200).send(product);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to update the product" });
-    }
-});
-*/
-
-
-
-/*
-router.put("/dashboard/:id", async (req, res) => {
-    try {
-        const { title } = req.body;
-        if (!title) {
-            return res.status(400).send({ message: "Title field is required" });
-        }
-
-        const product = await Product.findByIdAndUpdate(req.params.id, { title }, { new: true });
-        if (!product) {
-            return res.status(404).send({ message: "Product not found" });
-        }
-        res.status(200).send(product);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to update the product" });
-    }
-});
-*/
-
-
-/*
-// Eliminar una tarea por ID
-router.delete("/id/:id", async (req, res) => {
-    try {
-        const product = await Product.findByIdAndDelete(req.params.id);
-        if (!product) {
-            return res.status(404).send({ message: "Product not found" });
-        }
-        res.status(200).send({ message: "Product deleted successfully" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to delete the product" });
-    }
-});
-*/
-
-
