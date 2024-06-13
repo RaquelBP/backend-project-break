@@ -275,10 +275,9 @@ const showProductByCategory = async (req, res, next) => {
             //console.log("working")
             const productCard = getProductCards(products);
             bodyPlaceholder = getNavBar() + productCard
-            html = baseHtml(bodyPlaceholder, `Categoría: ${req.params.category}`)
-            
-            res.send(html);
+            html = baseHtml(bodyPlaceholder, `Categoría: ${req.params.category}`) 
         }
+        res.send(html);
     }
         
     catch (error) {
@@ -287,7 +286,7 @@ const showProductByCategory = async (req, res, next) => {
 };
 
 
-const showNewProduct = async(req, res) => {
+const showNewProduct = async(req, res, next) => {
     try {
         bodyPlaceholder = getNavBar() + createForm()
         const html = baseHtml(bodyPlaceholder, "Nuevo Producto")
@@ -299,7 +298,7 @@ const showNewProduct = async(req, res) => {
 }}
 
 
-const createProduct = async(req, res) => {
+const createProduct = async(req, res, next) => {
     try {
         //console.log(req.url) //Cheack si viene de dashboard o no
         //const infoFormulario = ''
@@ -322,7 +321,7 @@ const createProduct = async(req, res) => {
 }}
 
 
-const editProduct = async(req, res) => {
+const editProduct = async(req, res, next) => {
     try {
         const product = await Product.findById(req.params.id);
         bodyPlaceholder = getNavBar() + editForm(product)
@@ -336,7 +335,7 @@ const editProduct = async(req, res) => {
 
 
 
-const updateProduct = async (req, res) => {
+const updateProduct = async (req, res, next) => {
     try {
         const { name, description, image, category, size, price  } = req.body;
         const product = await Product.findByIdAndUpdate(req.params.id, { name, description, image, category, size, price  }, { new: true, runValidators: true } ); //runValidator: True para que detecte los campos requeridos del esquema mongoose
@@ -344,13 +343,15 @@ const updateProduct = async (req, res) => {
         
         if (!product || !product.image) {
             throw new Error('Product not found')
+        } else {
+            const productCardDash = getProductCardDash(product);
+            bodyPlaceholder = getNavBar() + productCardDash
+            html = baseHtml(bodyPlaceholder, "Editar Producto")
+
+            res.redirect('/dashboard');
         }
 
-        const productCardDash = getProductCardDash(product);
-        bodyPlaceholder = getNavBar() + productCardDash
-        html = baseHtml(bodyPlaceholder, "Editar Producto")
-
-        res.redirect('/dashboard');
+        
         //res.status(200).send(product);
     } catch (error) {
         next(error)
@@ -359,13 +360,15 @@ const updateProduct = async (req, res) => {
 
 
 
-const deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res, next) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product || !product.image) {
             throw new Error('Product not found')
+        } else{
+            res.redirect('/dashboard');
         }
-        res.redirect('/dashboard');
+        
     } catch (error) {
         next(error)
     }

@@ -72,7 +72,7 @@ const loginEmailPassword = async (req, res, next) => {
   const logout = async (req, res, next) => {
     try {
       await signOut(auth)
-      //res.redirect('/products');
+      res.redirect('/products');
     } catch (error) {
       next(error)
     }

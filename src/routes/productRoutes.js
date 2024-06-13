@@ -48,7 +48,6 @@ router.put("/dashboard/:id/", monitorAuthState, updateProduct);
 
 
 // Eliminar una tarea por ID
-//router.delete("/dashboard/:id/delete", deleteProduct);
 router.delete("/dashboard/:id/delete", monitorAuthState, deleteProduct);
 
 
