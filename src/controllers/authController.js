@@ -1,7 +1,6 @@
 const { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, AuthErrorCodes } = require('firebase/auth');
 const { app } = require('../config/firebase');
-
-const { baseHtml, getNavBar, errorHandler } = require('../controllers/productController')
+const { baseHtml, getNavBar } = require('../controllers/productController')
 
 const auth = getAuth(app);
 
@@ -29,46 +28,53 @@ const showLoginForm = (req, res) => {
     <form action="/logout" method="post">
       <button type="submit">Logout</button>
     </form>
-    <a href="/products">Products</a>
-  `;
-  res.send(loginForm);
+  `
+    bodyPlaceholder = getNavBar() + loginForm
+
+    let html = baseHtml(bodyPlaceholder, "Login")
+
+    //console.log("ErrorMiddlewareActivo")
+    res.send(html)
 };
 
-const loginEmailPassword = async (req, res) => {
+const loginEmailPassword = async (req, res, next) => {
     const { email, password } = req.body;
     try {
       console.log(auth)
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
       console.log(userCredential.user)
-      res.redirect('/dashboard');
+      res.redirect('/dashboard')
     } catch (error) {
-      console.log(error)
-      res.error = error;
-      errorHandler(req, res);
+      //console.log(error)
+      if (error.code === "auth/invalid-credential"){ //Si el código del error es de credenciales, lanza error de credenciales incorrecats
+        next({ message: "Credenciales incorrectas", status: 401 })
+      } else {
+        next(error)
+      }
     }
   };
   
-  const createAccount = async (req, res) => {
+  const createAccount = async (req, res, next) => {
     const { email, password } = req.body;
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       console.log(userCredential.user)
-      res.redirect('/dashboard');
+      res.redirect('/dashboard')
     } catch (error) {
-      console.log(error)
-      res.error = error;
-      errorHandler(req, res);
+      if (error.code === "auth/weak-password"){ 
+        next({ message: "La contraseña tiene que tener al menos 6 caracteres", status: 403 })
+      } else {
+        next(error)
+      }
     }
   };
   
-  const logout = async (req, res) => {
+  const logout = async (req, res, next) => {
     try {
-      await signOut(auth);
-      res.redirect('/products');
+      await signOut(auth)
+      //res.redirect('/products');
     } catch (error) {
-      console.log(error)
-      res.error = error;
-      errorHandler(req, res);
+      next(error)
     }
   };
   

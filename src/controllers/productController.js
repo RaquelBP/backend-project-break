@@ -3,7 +3,7 @@ const Product = require("../models/Product");
 let bodyPlaceholder
 
 //FUNCIONES
-function baseHtml(){
+function baseHtml(bodyPlaceholder, title){
     let html = `
         <!DOCTYPE html>
         <html lang="en">
@@ -11,7 +11,7 @@ function baseHtml(){
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="stylesheet" href="/public/styles.css">
-            <title>Products</title>
+            <title>${title}</title>
         </head>
         <body>
           ${bodyPlaceholder}  
@@ -38,8 +38,9 @@ function getNavBar(){
         `
     return html;
 }
-
-function errorHandler (req, res) {
+/*
+//Función de error
+function errorToHtml (req, res) {
 
     console.error(res.error.message);
     const statusCode = res.error.status || 500 //Si no hay status code asignado le pone 500
@@ -52,10 +53,12 @@ function errorHandler (req, res) {
     `
     bodyPlaceholder = getNavBar() + errorHtml
 
-    let html = baseHtml()
+    let html = baseHtml(bodyPlaceholder)
 
     res.status(statusCode).send(html);
+
 };
+*/
 
 //Tarjetas para todos los productos
 function getProductCards(products) {
@@ -209,26 +212,25 @@ function editForm(product) {
 }
 
 //CONTROLADORES
-const showProducts = async (req, res) => {
+const showProducts = async (req, res, next) => {
     try{
         const products = await Product.find();
         let html
         if(req.url.includes("/dashboard")){ //Checkea si estamos en dashboard o no
             const productCards = getProductCardsDash(products);
             bodyPlaceholder = getNavBar() + productCards
-            html = baseHtml()
+            html = baseHtml(bodyPlaceholder, "Dashboard: Productos")
             //+ getNavBar() + productCards;
         }else{
             const productCards = getProductCards(products);
             bodyPlaceholder = getNavBar() + productCards
-            html = baseHtml()
+            html = baseHtml(bodyPlaceholder, "Productos")
             //+ getNavBar() + productCards;
         }
         
         res.send(html);}
     catch (error) {
-        res.error = error
-        errorHandler(req, res)
+        next(error)
     }
 };
 
@@ -238,29 +240,27 @@ const showProductById = async (req, res, next) => {
         let html
 
         
-        if (!product || !product.image) {
-            res.error = { message: "Error. Product not found", status: 404 };
-            return errorHandler(req, res);
+        if (!product || !product.image) { //Si la id tiene el formato correcto, oero no corresponde a ningún producto
+            throw new Error('ID not found')
         }
 
         if(req.url.includes("/dashboard")){ //Checkea si estamos en dashboard o no
             const productCardDash = getProductCardDash(product);
             bodyPlaceholder = getNavBar() + productCardDash
-            html = baseHtml()
+            html = baseHtml(bodyPlaceholder, `Dashboard: ${product.name}`)
 
         } else {
             const productCard = getProductCard(product);
             bodyPlaceholder = getNavBar() + productCard
-            html = baseHtml()
+            html = baseHtml(bodyPlaceholder, `Producto: ${product.name}`)
         }
         res.send(html);}
-    catch (error) {
-        res.error = { message: "Invalid product ID" }
-        errorHandler(req, res)
+    catch (error) { //Id no tiene el formato correcto
+        next(error)
     }
 };
 
-const showProductByCategory = async (req, res) => {
+const showProductByCategory = async (req, res, next) => {
     try{
         //console.log("working")
         //console.log(req.params.category)
@@ -270,21 +270,19 @@ const showProductByCategory = async (req, res) => {
         let html
         const categoriasDisponibles = ["camisetas", "pantalones", "zapatos", "accesorios"];
         if (!categoriasDisponibles.includes(req.params.category)) {
-            res.error = { message: "Category not found", status: 404 };
-            return errorHandler(req, res);
+            throw new Error('Category not found')
         } else {
             //console.log("working")
             const productCard = getProductCards(products);
             bodyPlaceholder = getNavBar() + productCard
-            html = baseHtml()
+            html = baseHtml(bodyPlaceholder, `Categoría: ${req.params.category}`)
             
             res.send(html);
         }
     }
         
     catch (error) {
-        res.error = error
-        errorHandler (req, res)
+        next(error)
     }
 };
 
@@ -292,13 +290,12 @@ const showProductByCategory = async (req, res) => {
 const showNewProduct = async(req, res) => {
     try {
         bodyPlaceholder = getNavBar() + createForm()
-        const html = baseHtml()
+        const html = baseHtml(bodyPlaceholder, "Nuevo Producto")
         res.send(html);
     }
 
     catch (error) {
-        res.error = error
-        errorHandler (req, res)
+        next(error)
 }}
 
 
@@ -315,14 +312,13 @@ const createProduct = async(req, res) => {
         
         const productCardDash = getProductCardDash(product);
         bodyPlaceholder = getNavBar() + productCardDash
-        html = baseHtml()
+        html = baseHtml(bodyPlaceholder, "Nuevo Producto")
         res.redirect('/dashboard');
     }
         //res.status(201).send(product);}
 
     catch (error) {
-        res.error = error
-        errorHandler (req, res)
+        next(error)
 }}
 
 
@@ -330,13 +326,12 @@ const editProduct = async(req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         bodyPlaceholder = getNavBar() + editForm(product)
-        const html = baseHtml()
+        const html = baseHtml(bodyPlaceholder, "Editar Producto")
         res.send(html);
     }
 
     catch (error) {
-        res.error = error
-        errorHandler (req, res)
+        next(error)
 }}
 
 
@@ -348,19 +343,17 @@ const updateProduct = async (req, res) => {
         
         
         if (!product || !product.image) {
-            res.error = { message: "Error. Product not found", status: 404 };
-            return errorHandler(req, res);
+            throw new Error('Product not found')
         }
 
         const productCardDash = getProductCardDash(product);
         bodyPlaceholder = getNavBar() + productCardDash
-        html = baseHtml()
+        html = baseHtml(bodyPlaceholder, "Editar Producto")
 
         res.redirect('/dashboard');
         //res.status(200).send(product);
     } catch (error) {
-        res.error = error
-        errorHandler (req, res)
+        next(error)
     }
 }
 
@@ -370,13 +363,11 @@ const deleteProduct = async (req, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product || !product.image) {
-            res.error = { message: "Error. Product not found", status: 404 };
-            return errorHandler(req, res);
+            throw new Error('Product not found')
         }
         res.redirect('/dashboard');
     } catch (error) {
-        res.error = error
-        errorHandler (req, res)
+        next(error)
     }
 }
 
@@ -384,5 +375,5 @@ const deleteProduct = async (req, res) => {
 
 
 module.exports = {
-    showProducts, showProductById, showProductByCategory, showNewProduct, createProduct, editProduct, updateProduct, deleteProduct, baseHtml, getNavBar, errorHandler
+    showProducts, showProductById, showProductByCategory, showNewProduct, createProduct, editProduct, updateProduct, deleteProduct, baseHtml, getNavBar
 };

@@ -5,7 +5,7 @@ const auth = getAuth(app);
 const monitorAuthState = (req, res, next) => {
   onAuthStateChanged(auth, user => {
     if (user) {
-      console.log(user);
+      console.log(user)
       next();
     } else {
       res.redirect('/login')
