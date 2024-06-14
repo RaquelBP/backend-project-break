@@ -1,0 +1,96 @@
+body{
+    background-color: lightblue;
+    margin-top: 100px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-family: sans-serif;
+}
+body img {
+    height: 200px;
+}
+
+header {
+    background-color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    
+}
+nav {
+    width: 100%;
+    margin-right: 75px;
+    
+}
+
+header nav ul {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+header ul div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+header li {
+    margin: 20px;
+    list-style-type: none;
+}
+
+header li a {
+    color: black;
+    text-decoration: none;
+}
+header li a:hover{
+    color: grey;
+}
+
+.product-card, .div-forms{
+    padding: 20px;
+    background-color: white;
+    width: 350px;
+    border-radius: 30px;
+    box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.div-forms button, .product-card a, .product-card button{
+    margin: 20px;
+    padding: 10px;
+    background-color: rgb(125, 159, 170);
+    color: white;
+    border-radius: 20px;
+    border: 0px;
+}
+.div-forms button:hover, .product-card a:hover, .product-card button:hover{
+    background-color: rgb(101, 132, 143);
+}
+
+.product-card a{
+    text-decoration: none;
+}
+
+
+.field-group{
+    display: flex;
+    justify-content: space-around;
+    position: relative;
+    right: 30px;
+    margin-bottom: 5px;
+    
+}
+.field-group input, .field-group select {
+    position: absolute;
+    right: 0px;
+   
+}

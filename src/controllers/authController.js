@@ -6,28 +6,38 @@ const auth = getAuth(app);
 
 const showLoginForm = (req, res) => {
     const loginForm = `
-    <h2>Iniciar Sesión</h2>
-    <form action="/login" method="post">
-      <label for="login-email">Email:</label>
-      <input type="email" id="login-email" name="email" required><br>
-      <label for="login-password">Contraseña:</label>
-      <input type="password" id="login-password" name="password" required><br>
-      <button type="submit">Iniciar sesión</button>
-    </form>
+    <div class="div-forms">
+      <h2>Iniciar Sesión</h2>
+      <form action="/login" method="post">
+        <div class="field-group">
+          <label for="login-email">Email:</label>
+          <input type="email" id="login-email" name="email" required><br>
+        </div>
+        <div class="field-group">
+          <label for="login-password">Contraseña:</label>
+          <input type="password" id="login-password" name="password" required><br>
+        </div>
+        <button type="submit">Iniciar sesión</button>
+      </form>
 
-    <h2>Crear Cuenta</h2>
-    <form action="/signup" method="post">
-      <label for="signup-email">Email:</label>
-      <input type="email" id="signup-email" name="email" required><br>
-      <label for="signup-password">Contraseña:</label>
-      <input type="password" id="signup-password" name="password" required><br>
-      <button type="submit">Crear Cuenta</button>
-    </form>
+      <h2>Crear Cuenta</h2>
+      <form action="/signup" method="post">
+        <div class="field-group">
+          <label for="signup-email">Email:</label>
+          <input type="email" id="signup-email" name="email" required><br>
+        </div>
+        <div class="field-group">
+          <label for="signup-password">Contraseña:</label>
+          <input type="password" id="signup-password" name="password" required><br>
+        </div>
+        <button type="submit">Crear cuenta</button>
+      </form>
 
-    <h2>Cerrar sesión</h2>
-    <form action="/logout" method="post">
-      <button type="submit">Logout</button>
-    </form>
+      <h2>Cerrar sesión</h2>
+      <form action="/logout" method="post">
+        <button type="submit">Cerrar sesión</button>
+      </form>
+    </div>
   `
     bodyPlaceholder = getNavBar() + loginForm
 

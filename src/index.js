@@ -6,22 +6,23 @@ const routes = require('./routes/productRoutes');
 const methodOverride = require('method-override')
 const errorHandler = require('./middlewares/errorHandler')
 
-
 // Middlewares para habilitar recepción de JSONs
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(methodOverride('_method'))
 
-
-
 const PORT = process.env.PORT;
+
+
+
+app.use(express.static('public')) //Para los estilos
 
 app.use('/', routes);
 
-dbConnection();
+dbConnection()
 
-app.use(errorHandler);
+app.use(errorHandler)
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
