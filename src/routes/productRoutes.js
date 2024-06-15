@@ -7,16 +7,8 @@ const { monitorAuthState } = require('../middlewares/authMiddleware');
 const { showLoginForm, loginEmailPassword, createAccount, logout } = require('../controllers/authController');
 
 
-//----------ROOT
-router.get("/", async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.status(200).send(products);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "There was a problem trying to get products" });
-    }
-});
+//ROOT
+router.get("/", showProducts);
 
 //GET TODOS LOS PRODUCTOS
 router.get("/products", showProducts);
